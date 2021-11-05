@@ -1,0 +1,56 @@
+#Homework: Lab 6
+#Name: Lauren Done
+#Group: Jennifer Lavayen, Joaquin Sanchez, Hugo
+
+#Preliminary work needed for Logit Model
+Household_Pulse_data$vaxx <- (Household_Pulse_data$RECVDVACC == "yes got vaxx")
+is.na(Household_Pulse_data$vaxx) <- which(Household_Pulse_data$RECVDVACC == "NA") 
+
+
+table(Household_Pulse_data$vaxx,Household_Pulse_data$EEDUC)
+
+summary(Household_Pulse_data$vaxx)
+vaxx_factor <- as.factor(Household_Pulse_data$vaxx)
+levels(vaxx_factor) <- c("no","yes")
+
+glm(RECVDVACC ~ EEDUC, family = binomial, data = Household_Pulse_data)
+
+pick_use1 <- (Household_Pulse_data$REGION == "Midwest") 
+dat_use1 <- subset(Household_Pulse_data, pick_use1)
+library(stargazer)
+
+#Might want to use this for factors after subsetting in case some get lost
+
+dat_use1$RECVDVACC <- droplevels(dat_use1$RECVDVACC) 
+
+#So start from this baseline model and launch ahead,
+attach(Household_Pulse_data)
+install.packages("ggplot2")
+library(ggplot2)
+install.packages("gridExtra")
+library(gridExtra)
+
+
+dose_factor <- as.factor(Household_Pulse_data$DOSESRV)
+is.na(Household_Pulse_data$DOSESRV) <- which(Household_Pulse_data$DOSESRV == "NA") 
+levels(dose_factor) <- c("NA","yes got all doses","yes got all doses", "no will not get all doses")
+
+
+model_logit1<- glm(vaxx ~ TBIRTH_YEAR + INCOME + DOSESRV)
+stargazer(model_logit2, type = "text", title = "Table Three: Regression Resutls")
+logit_plot1 <- qplot(vaxx, TBIRTH_YEAR, ylim = c(1930,2021), data=dat_use1)
+graph1 <- ggplot(dat_use1, aes(x=RRACE, y=INCOME, color=DOSESRV)) + geom_jitter(stat = "identity", fill="black") + geom_smooth(method="glm", formula = y ~ s, se=FALSE)+ ggtitle("Graph #2")
+graph1
+
+model_logit1_fitted <- glm(vaxx ~ TBIRTH_YEAR + INCOME + DOSESRV, family = binomial, data = dat_use1)
+stargazer(model_logit1_fitted, type = "text", title = "Table Four Fitted: Regression Resutls")
+logit_plot1_fitted <- qplot(vaxx, TBIRTH_YEAR, ylim = c(1930,2021), data=dat_use1)
+graph2_fitted <- ggplot(dat_use1, aes(x=RRACE, y=INCOME, color=DOSESRV)) + geom_jitter(stat = "identity", fill="black") + geom_smooth(method="glm", formula = y ~ s, se=FALSE)+ ggtitle("Graph #2 FITTED")
+graph2_fitted
+
+summary(model_logit1)
+summary(model_logit1_fitted)
+ 
+grid.arrange(graph1,graph1_fitted)
+summary(model_logit1)
+summary(model_logit1_fitted)
